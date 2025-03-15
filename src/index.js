@@ -15,17 +15,19 @@ function validateForm(e) {
 
   // console.log(e.target);
 
+  let errorMessage = "";
+
   if (!validateUsername(userName)) {
     e.preventDefault();
-    displayMessage("Username is invalid.");
+    displayMessage(errorMessage);
     return false;
   } else if (!validateEmail(userEmail)) {
     e.preventDefault();
-    displayMessage("Email is invalid.");
+    displayMessage(errorMessage);
     return false;
   } else if (!validatePassword(userPassword)) {
     e.preventDefault();
-    displayMessage("Password is invalid.");
+    displayMessage(errorMessage);
     return false;
   } else if (!validatePasswordMatch(userPassword, passwordCheck)) {
     e.preventDefault();
@@ -33,7 +35,7 @@ function validateForm(e) {
     return false;
   } else if (!validateTerms(terms)) {
     e.preventDefault();
-    displayMessage("You must agree to terms.");
+    displayMessage("You must agree to terms");
     return false;
   }
 
@@ -41,37 +43,79 @@ function validateForm(e) {
 
   function validateUsername(name) {
     // ^ pattern enforced from beginning of string
-    // [a-zA-Z0-9] any one of these characters are valid
+    // [a-zA-Z0-9] any one of these characters
     // {4,} at least 4 character long
     // $ pattern enforced until the end of the string
-    const regex = /^[a-zA-Z0-9]{4,}$/;
-    if (name === "") return false;
+    if (name === "") {
+      errorMessage = "You must have a username.";
+      return false;
+    } else if (name.length < 4) {
+      errorMessage = "Your username must be at least 4 characters long.";
+      return false;
+    } else if (!/^[a-zA-Z0-9]{4,}$/.test(name)) {
+      errorMessage = "Your username must consist of letters and digits only.";
+      return false;
+    }
 
-    return regex.test(name);
+    return true;
   }
 
   function validateEmail(email) {
     // ^ pattern enforced from beginning of string
-    // [a-zA-Z0-9._%+-] at least 1 a-z but may be more
+    // [a-zA-Z0-9._%+-] means a-z A-Z 0-9 . _ % + - characters
     // + at least 1 or more, same as {1,}
+    // @ for @
+    // [a-zA-Z0-9.-] means a-z A-Z 0-9 . - characters
+    // + at least 1 or more, same as {1,}
+    // \. for .
+    // [a-zA-Z]{2,4} for 2-4 characters like 'com' or 'net' or 'io'
     // $ pattern enforced until the end of the string
     const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-    if (email === "") return false;
+    const domainName = email.split("@")[1];
 
-    return regex.test(email);
+    if (email === "") {
+      errorMessage = "You must enter an email address.";
+      return false;
+    } else if (!regex.test(email)) {
+      errorMessage = "Email must be a valid email address.";
+      return false;
+    } else if (domainName.toLowerCase() === "example.com") {
+      errorMessage = "The domain 'example.com' is not a valid.";
+      return false;
+    }
+
+    return true;
   }
 
   function validatePassword(password) {
-    // ^ pattern enforced from beginning of string
-    // (?=.*[a-z]) at least 1 a-z but may be more
-    // (?=.*[A-Z]) at least 1 A-Z but may be more
-    // (?=.*\d) at least 1 digit but may be more
-    // [a-zA-Z0-9] any one of these chars
-    // {12,} at least 12 character long but may be longer
-    // $ pattern is enforced until the end of the string
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-z0-9]{12,}$/;
+    if (password.length < 12) {
+      errorMessage = "Password must be at least 12 characters long.";
+      return false;
+    } else if (
+      !/^(?=.*[a-z])(?=.*[A-Z])[a-zA-z0-9.!@#\$%\^&*]{12,}$/.test(password)
+    ) {
+      errorMessage =
+        "Password must contain at least one uppercase and one lowercase letter.";
+      return false;
+    } else if (!/^(?=.*\d)[a-zA-z0-9.!@#\$%\^&*]{12,}$/.test(password)) {
+      errorMessage = "Password must contain one digit.";
+      return false;
+    } else if (
+      !/^(?=.*[.!@#\$%\^&*])[a-zA-z0-9.!@#\$%\^&*]{12,}$/.test(password)
+    ) {
+      errorMessage =
+        "Password must contain at least one special character (.!@#$%^&*).";
+      return false;
+    } else if (/password/i.test(password)) {
+      errorMessage =
+        "Password must not contain the word 'password' upper or lowercase.";
+      return false;
+    } else if (new RegExp(userName, "i").test(password)) {
+      errorMessage = "Password must not contain your chosen username";
+      return false;
+    }
 
-    return regex.test(password);
+    return true;
   }
 
   function validatePasswordMatch(p1, p2) {
@@ -93,6 +137,5 @@ function validateForm(e) {
 }
 
 function clearContainer(container) {
-  console.log("clear");
   container.innerHTML = "";
 }
