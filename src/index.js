@@ -147,7 +147,7 @@ function validateRegForm(e) {
 
   function checkTwoUnique(string) {
     let storage = "";
-    for (char of string) {
+    for (let char of string) {
       if (!storage.includes(char)) {
         storage += char;
       }
